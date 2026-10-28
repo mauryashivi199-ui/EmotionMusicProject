@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>MoodBeat AI - Full Music, Ringtones & Downloader</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Face-API.js for Browser Realtime Emotion Recognition -->
+  <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.min.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    @keyframes spin-slow {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .vinyl-spinning {
+      animation: spin-slow 14s linear infinite;
+    }
+    .vinyl-paused {
+      animation-play-state: paused;
+    }
+    .glass-nav {
+      background: rgba(13, 17, 28, 0.94);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .glass-card {
+      background: rgba(18, 24, 38, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    /* Wave Equalizer */
+    .bar {
+      transition: height 0.15s ease;
+    }
+    .playing .bar {
+      animation: sound 1s infinite alternate;
+    }
+    @keyframes sound {
+      0% { height: 4px; }
+      100% { height: 26px; }
+    }
+    .bar:nth-child(1)  { animation-duration: 470ms; }
+    .bar:nth-child(2)  { animation-duration: 410ms; }
+    .bar:nth-child(3)  { animation-duration: 380ms; }
+    .bar:nth-child(4)  { animation-duration: 450ms; }
+    .bar:nth-child(5)  { animation-duration: 390ms; }
+    
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="bg-[#080c14] text-gray-100 min-h-screen flex flex-col font-sans selection:bg-rose-500 selection:text-white pb-28">
+
+  <!-- Top App Bar -->
+  <header class="sticky top-0 z-40 bg-[#080c14]/90 backdrop-blur-xl border-b border-white/5 px-4 sm:px-6 py-3.5 flex items-center justify-between">
+    <div onclick="navigateTo('home')" class="flex items-center gap-3 cursor-pointer">
+      <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-rose-500 via-purple-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-rose-500/25">
+        <i class="fa-solid fa-compact-disc text-xl text-white"></i>
+      </div>
+      <div>
+        <h1 class="text-base sm:text-lg font-bold bg-gradient-to-r from-rose-400 via-purple-300 to-indigo-400 bg-clip-text text-transparent">MoodBeat AI</h1>
+        <p class="text-[10px] text-gray-400">Songs &bull; Ringtones &bull; Downloader</p>
+      </div>
+    </div>
+
+    <!-- Quick Action / Status -->
+    <div class="flex items-center gap-2">
+      <button onclick="navigateTo('downloads')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 text-gray-300 text-xs font-semibold border border-white/10 transition">
+        <i class="fa-solid fa-arrow-down text-rose-400"></i>
+        <span class="hidden sm:inline">Downloads (<span id="topDlCount">0</span>)</span>
+      </button>
+      <button onclick="navigateTo('ai')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/30 text-xs font-semibold shadow-md active:scale-95 transition">
+        <i class="fa-solid fa-face-smile"></i>
+        <span class="hidden sm:inline">AI Mood</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Multi-View Screen Container -->
+  <main class="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6">
+
+    <!-- ==================== VIEW 1: HOME PAGE ==================== -->
+    <section id="view-home" class="space-y-8">
+      
+      <!-- Interactive Hero Banner -->
+      <div class="relative overflow-hidden rounded-3xl p-6 sm:p-10 bg-gradient-to-br from-indigo-950/60 via-purple-950/40 to-rose-950/50 border border-white/10 shadow-2xl">
+        <div class="absolute -right-8 -bottom-8 w-64 h-64 bg-rose-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        
+        <div class="max-w-xl relative z-10 space-y-4">
+          <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs font-semibold">
+            <span class="w-2 h-2 rounded-full bg-rose-400 animate-ping"></span> High-Speed MP3 Downloader + Ringtones
+          </span>
+          <h2 class="text-2xl sm:text-4xl font-extrabold text-white leading-tight">
+            Gaana Suno, Ringtone Set Karo <span class="bg-gradient-to-r from-rose-400 to-purple-400 bg-clip-text text-transparent">& Download Karo.</span>
+          </h2>
+          <p class="text-xs sm:text-sm text-gray-300">
+            Duniya ka koi bhi gaana ya ringtone 1-click me direct mobile aur PC me download karo 320kbps original quality me.
+          </p>
+
+          <div class="flex flex-wrap gap-3 pt-2">
+            <button onclick="navigateTo('ringtones')" class="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-rose-600 to-indigo-600 hover:opacity-95 text-white font-semibold text-xs sm:text-sm shadow-xl shadow-rose-600/30 active:scale-95 transition flex items-center gap-2">
+              <i class="fa-solid fa-bell"></i> Browse Ringtones
+            </button>
+            <button onclick="navigateTo('discover')" class="px-5 py-2.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-semibold text-xs sm:text-sm border border-white/10 active:scale-95 transition flex items-center gap-2">
+              <i class="fa-solid fa-compass"></i> Search Full Songs
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Mood Mixes Row -->
+      <div>
+        <div class="flex items-center justify-between mb-3 px-1">
+          <h3 class="text-sm font-bold text-gray-200 uppercase tracking-wider flex items-center gap-2">
+            <i class="fa-solid fa-bolt text-rose-500"></i> Instant Mood Stations
+          </h3>
+          <span class="text-xs text-gray-400">Click to browse</span>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
+          <div onclick="openStation('happy')" class="glass-card cursor-pointer p-4 rounded-2xl border border-emerald-500/20 hover:border-emerald-500/50 transition group hover:scale-[1.02] relative overflow-hidden">
+            <div class="absolute -right-2 -bottom-2 text-4xl opacity-20 group-hover:scale-125 transition">😊</div>
+            <span class="text-2xl">😊</span>
+            <h4 class="text-sm font-bold text-emerald-400 mt-2">Happy & Joy</h4>
+            <p class="text-[11px] text-gray-400 mt-0.5">Bollywood & Dance Hits</p>
+          </div>
+
+          <div onclick="openStation('sad')" class="glass-card cursor-pointer p-4 rounded-2xl border border-sky-500/20 hover:border-sky-500/50 transition group hover:scale-[1.02] relative overflow-hidden">
+            <div class="absolute -right-2 -bottom-2 text-4xl opacity-20 group-hover:scale-125 transition">😢</div>
+            <span class="text-2xl">😢</span>
+            <h4 class="text-sm font-bold text-sky-400 mt-2">Melancholy Heart</h4>
+            <p class="text-[11px] text-gray-400 mt-0.5">Arijit & Sad Melodies</p>
+          </div>
+
+          <div onclick="openStation('angry')" class="glass-card cursor-pointer p-4 rounded-2xl border border-rose-500/20 hover:border-rose-500/50 transition group hover:scale-[1.02] relative overflow-hidden">
+            <div class="absolute -right-2 -bottom-2 text-4xl opacity-20 group-hover:scale-125 transition">🔥</div>
+            <span class="text-2xl">🔥</span>
+            <h4 class="text-sm font-bold text-rose-400 mt-2">High Bass & Rock</h4>
+            <p class="text-[11px] text-gray-400 mt-0.5">Workout & Adrenaline</p>
+          </div>
+
+          <div onclick="openStation('neutral')" class="glass-card cursor-pointer p-4 rounded-2xl border border-amber-500/20 hover:border-amber-500/50 transition group hover:scale-[1.02] relative overflow-hidden">
+            <div class="absolute -right-2 -bottom-2 text-4xl opacity-20 group-hover:scale-125 transition">☕</div>
+            <span class="text-2xl">☕</span>
+            <h4 class="text-sm font-bold text-amber-400 mt-2">Lo-Fi & Acoustic</h4>
+            <p class="text-[11px] text-gray-400 mt-0.5">Relax, Study & Sleep</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Featured Songs Showcase -->
+      <div class="glass-card rounded-2xl p-5 shadow-xl border border-white/5">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-sm font-bold text-gray-200 flex items-center gap-2">
+            <i class="fa-solid fa-fire text-rose-500"></i> Trending Songs & Tones
+          </h3>
+          <button onclick="navigateTo('discover')" class="text-xs text-rose-400 hover:underline">Search All</button>
+        </div>
+
+        <div id="homeFeaturedList" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <!-- Featured items loaded via JS -->
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ==================== VIEW 2: DISCOVER & FULL SEARCH (40+ SONGS) ==================== -->
+    <section id="view-discover" class="hidden space-y-6">
+      
+      <!-- Search Input Header with Fast Submit -->
+      <div class="relative">
+        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
+        <input 
+          id="musicSearchInput" 
+          type="text" 
+          placeholder="Search any singer, actor, song (Arijit, Shreya, Pawan Singh, Salman, Sidhu)..." 
+          class="w-full bg-[#121826] text-sm text-gray-100 rounded-2xl pl-11 pr-24 py-3.5 border border-white/10 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 shadow-xl transition"
+        >
+        <button id="searchBtn" class="absolute right-2 top-1/2 transform -translate-y-1/2 px-4 py-2 rounded-xl bg-gradient-to-r from-rose-600 to-indigo-600 hover:opacity-90 text-xs font-semibold text-white transition shadow-md">
+          Search
+        </button>
+      </div>
+
+      <!-- Quick Suggestion Badges -->
+      <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 text-xs text-gray-300">
+        <span class="text-gray-500 text-[11px]">Popular:</span>
+        <button onclick="performSearch('Arijit Singh')" class="px-3 py-1 rounded-full bg-white/5 hover:bg-white/10 border border-white/5 whitespace-nowrap">Arijit Singh</button>
+        <button onclick="performSearch('Shreya Ghoshal')" class="px-3 py-1 rounded-full bg-white/5 hover:bg-white/10 border border-white/5 whitespace-nowrap">Shreya Ghoshal</button>
+        <button onclick="performSearch('Pawan Singh Bhojpuri')" class="px-3 py-1 rounded-full bg-white/5 hover:bg-white/10 border border-white/5 whitespace-nowrap">Pawan Singh</button>
+        <button onclick="performSearch('Sidhu Moosewala')" class="px-3 py-1 rounded-full bg-white/5 hover:bg-white/10 border border-white/5 whitespace-nowrap">Sidhu Moosewala</button>
+        <button onclick="performSearch('Salman Khan Hits')" class="px-3 py-1 rounded-full bg-white/5 hover:bg-white/10 border border-white/5 whitespace-nowrap">Salman Khan</button>
+        <button onclick="performSearch('Taylor Swift')" class="px-3 py-1 rounded-full bg-white/5 hover:bg-white/10 border border-white/5 whitespace-nowrap">Taylor Swift</button>
+      </div>
+
+      <!-- Station Tabs Filter -->
+      <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+        <button onclick="switchDiscoverTab('happy')" id="tab-happy" class="px-4 py-2 rounded-xl text-xs font-semibold bg-rose-600 text-white whitespace-nowrap shadow-md">
+          😊 Happy Hits
+        </button>
+        <button onclick="switchDiscoverTab('sad')" id="tab-sad" class="px-4 py-2 rounded-xl text-xs font-semibold bg-white/5 text-gray-400 hover:text-white whitespace-nowrap">
+          😢 Sad Melodies
+        </button>
+        <button onclick="switchDiscoverTab('angry')" id="tab-angry" class="px-4 py-2 rounded-xl text-xs font-semibold bg-white/5 text-gray-400 hover:text-white whitespace-nowrap">
+          🔥 High Bass
+        </button>
+        <button onclick="switchDiscoverTab('neutral')" id="tab-neutral" class="px-4 py-2 rounded-xl text-xs font-semibold bg-white/5 text-gray-400 hover:text-white whitespace-nowrap">
+          ☕ Chill Lo-Fi
+        </button>
+      </div>
+
+      <!-- Live Search / Mood Track Listing -->
+      <div class="glass-card rounded-2xl p-4 sm:p-5 shadow-xl border border-white/5">
+        <div class="flex items-center justify-between mb-4">
+          <h3 id="feedTitle" class="text-sm font-bold text-gray-200 flex items-center gap-2">
+            <i class="fa-solid fa-music text-rose-500"></i> Songs List
+          </h3>
+          <span id="feedCount" class="text-xs text-rose-400 font-mono">0 Songs</span>
+        </div>
+
+        <div id="songFeedList" class="space-y-2 max-h-[480px] overflow-y-auto no-scrollbar pr-1">
+          <p class="text-xs text-gray-500 text-center py-8">Select a station or search above!</p>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ==================== VIEW 3: DEDICATED RINGTONES SECTION ==================== -->
+    <section id="view-ringtones" class="hidden space-y-6">
+      
+      <div class="flex items-center justify-between px-1">
+        <div>
+          <h2 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-bell text-rose-500"></i> Popular Ringtones & Caller Tunes
+          </h2>
+          <p class="text-xs text-gray-400">Play, preview, and download your favorite ringtones for phone</p>
+        </div>
+      </div>
+
+      <!-- Ringtones Grid -->
+      <div class="glass-card rounded-2xl p-4 sm:p-5 shadow-xl border border-white/5">
+        <div id="ringtonesFeedList" class="space-y-2.5 max-h-[500px] overflow-y-auto no-scrollbar pr-1">
+          <p class="text-xs text-gray-500 text-center py-8">Loading ringtones...</p>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ==================== VIEW 4: DEDICATED DOWNLOADS MANAGER ==================== -->
+    <section id="view-downloads" class="hidden space-y-6">
+      
+      <div class="flex items-center justify-between px-1">
+        <div>
+          <h2 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-circle-down text-rose-500"></i> Downloads & Offline Vault
+          </h2>
+          <p class="text-xs text-gray-400">All songs and ringtones you've downloaded are saved here</p>
+        </div>
+        <button onclick="clearAllDownloads()" class="text-xs text-gray-400 hover:text-rose-400 transition">
+          Clear History
+        </button>
+      </div>
+
+      <!-- Downloaded Items List -->
+      <div class="glass-card rounded-2xl p-4 sm:p-5 shadow-xl border border-white/5">
+        <div id="downloadsFeedList" class="space-y-2.5 max-h-[500px] overflow-y-auto no-scrollbar">
+          <p class="text-xs text-gray-500 text-center py-10">No downloads yet. Click ⬇️ Download on any song or ringtone!</p>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ==================== VIEW 5: FULL NOW PLAYING SCREEN ==================== -->
+    <section id="view-player" class="hidden flex flex-col items-center justify-center max-w-md mx-auto py-4 text-center">
+      
+      <!-- Floating Ambient Background Glow -->
+      <div id="fullPlayerGlow" class="absolute top-1/4 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-rose-600/25 rounded-full blur-3xl pointer-events-none transition-colors duration-700"></div>
+
+      <!-- Vinyl Disk Art -->
+      <div class="relative my-6 group">
+        <div class="w-64 h-64 sm:w-72 sm:h-72 rounded-full p-2 bg-gradient-to-tr from-gray-900 via-gray-800 to-gray-700 shadow-2xl border-4 border-white/10 flex items-center justify-center relative">
+          <!-- Spinning Artwork -->
+          <img id="playerVinylImg" src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500" alt="Vinyl" class="w-56 h-56 sm:w-64 sm:h-64 rounded-full object-cover vinyl-spinning vinyl-paused shadow-inner">
+          
+          <!-- Vinyl Center Ring -->
+          <div class="absolute w-14 h-14 rounded-full bg-[#090d16] border-4 border-gray-600 flex items-center justify-center shadow-lg">
+            <div class="w-4 h-4 rounded-full bg-rose-500"></div>
+          </div>
+        </div>
+
+        <!-- Equalizer Overlay Pill -->
+        <div id="fullPlayerEqualizer" class="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex items-end gap-1 h-6 px-3 py-1 bg-black/75 backdrop-blur-md rounded-full border border-white/10 hidden">
+          <span class="bar w-1 bg-rose-400 rounded-full"></span>
+          <span class="bar w-1 bg-purple-400 rounded-full"></span>
+          <span class="bar w-1 bg-indigo-400 rounded-full"></span>
+          <span class="bar w-1 bg-teal-400 rounded-full"></span>
+        </div>
+      </div>
+
+      <!-- Track Information & Actions -->
+      <div class="w-full px-4 mt-2">
+        <div class="flex items-center justify-between">
+          <div class="text-left truncate flex-1 pr-3">
+            <div class="flex items-center gap-2">
+              <h2 id="fullTitle" class="text-lg sm:text-xl font-bold text-white truncate">Tap any song to play</h2>
+              <span class="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold whitespace-nowrap">FULL 320KBPS</span>
+            </div>
+            <p id="fullArtist" class="text-xs sm:text-sm text-rose-400 font-medium truncate mt-0.5">MoodBeat Music Player</p>
+          </div>
+          
+          <!-- Action Buttons: Download & Like -->
+          <div class="flex items-center gap-2">
+            <button id="fullDlBtn" onclick="downloadCurrentSong()" class="w-10 h-10 rounded-full bg-white/5 hover:bg-rose-500/20 text-gray-300 hover:text-rose-400 border border-white/10 flex items-center justify-center transition active:scale-95 text-sm" title="Download MP3">
+              <i class="fa-solid fa-arrow-down"></i>
+            </button>
+            <button id="fullLikeBtn" class="w-10 h-10 rounded-full bg-white/5 hover:bg-rose-500/20 text-gray-400 hover:text-rose-400 border border-white/10 flex items-center justify-center transition active:scale-95 text-base">
+              <i id="fullLikeIcon" class="fa-regular fa-heart"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Timeline Scrubber -->
+      <div class="w-full px-4 mt-6">
+        <input id="fullProgress" type="range" min="0" max="100" value="0" class="w-full h-1.5 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-rose-500">
+        <div class="flex justify-between text-xs text-gray-400 mt-1 font-mono">
+          <span id="fullCurrentTime">0:00</span>
+          <span id="fullTotalTime">0:00</span>
+        </div>
+      </div>
+
+      <!-- Primary Playback Controls -->
+      <div class="flex items-center justify-center gap-8 mt-6">
+        <button id="fullPrevBtn" class="text-gray-400 hover:text-white text-2xl transition active:scale-90">
+          <i class="fa-solid fa-backward-step"></i>
+        </button>
+        <button id="fullPlayBtn" class="w-16 h-16 rounded-full bg-gradient-to-tr from-rose-600 to-indigo-600 hover:from-rose-500 hover:to-indigo-500 text-white flex items-center justify-center text-2xl shadow-xl shadow-rose-600/30 transition active:scale-95">
+          <i id="fullPlayIcon" class="fa-solid fa-play ml-1"></i>
+        </button>
+        <button id="fullNextBtn" class="text-gray-400 hover:text-white text-2xl transition active:scale-90">
+          <i class="fa-solid fa-forward-step"></i>
+        </button>
+      </div>
+
+      <!-- Volume Bar -->
+      <div class="flex items-center gap-3 w-3/4 mt-6">
+        <i class="fa-solid fa-volume-low text-gray-500 text-xs"></i>
+        <input id="fullVolumeSlider" type="range" min="0" max="1" step="0.05" value="0.8" class="w-full h-1 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-rose-400">
+        <i class="fa-solid fa-volume-high text-gray-500 text-xs"></i>
+      </div>
+
+    </section>
+
+    <!-- ==================== VIEW 6: AI EMOTION CAMERA SCANNER ==================== -->
+    <section id="view-ai" class="hidden space-y-6">
+      
+      <div class="glass-card rounded-3xl p-4 sm:p-6 shadow-2xl border border-white/5 relative overflow-hidden">
+        
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h2 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-face-smile text-rose-500"></i> Face Emotion AI
+            </h2>
+            <p class="text-xs text-gray-400">Camera will only start when you click "Start Camera"</p>
+          </div>
+          <button id="cameraActionBtn" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition shadow-md active:scale-95">
+            <i class="fa-solid fa-video mr-1"></i> Start Camera
+          </button>
+        </div>
+
+        <!-- Camera Video Feed & Live Face Canvas Overlay -->
+        <div class="relative w-full aspect-video max-h-[380px] rounded-2xl overflow-hidden bg-black/80 flex items-center justify-center border border-white/10 shadow-inner">
+          <div id="camInactiveCard" class="flex flex-col items-center justify-center p-6 text-center space-y-3">
+            <div class="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 text-2xl">
+              <i class="fa-solid fa-camera"></i>
+            </div>
+            <p class="text-sm font-medium text-gray-300">Camera is Sleeping</p>
+            <p class="text-xs text-gray-500 max-w-xs">Tap "Start Camera" above to detect facial emotions.</p>
+          </div>
+
+          <video id="videoFeed" autoplay muted playsinline class="w-full h-full object-cover hidden transform -scale-x-100"></video>
+          <canvas id="overlayCanvas" class="absolute inset-0 w-full h-full pointer-events-none transform -scale-x-100 hidden"></canvas>
+
+          <!-- Current Emotion Tag in Corner -->
+          <div id="liveMoodCard" class="absolute bottom-3 left-3 hidden bg-black/80 backdrop-blur-md px-3.5 py-2 rounded-xl border border-white/10 flex items-center gap-2.5 shadow-xl">
+            <span id="liveMoodEmoji" class="text-2xl">😊</span>
+            <div>
+              <p class="text-[9px] uppercase font-bold text-gray-400 tracking-wider">Detected Mood</p>
+              <p id="liveMoodName" class="text-xs font-bold text-white capitalize">Neutral</p>
+            </div>
+            <span id="liveMoodScore" class="text-[10px] px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 font-mono ml-1">0%</span>
+          </div>
+        </div>
+
+        <!-- Real-Time Metrics -->
+        <div class="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+          <div class="p-3 bg-white/5 rounded-xl border border-white/5">
+            <div class="flex justify-between text-xs font-medium text-emerald-400">
+              <span>😊 Happy</span>
+              <span id="ai-score-happy">0%</span>
+            </div>
+            <div class="w-full bg-gray-800 rounded-full h-1.5 mt-2">
+              <div id="ai-bar-happy" class="bg-emerald-400 h-1.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <div class="p-3 bg-white/5 rounded-xl border border-white/5">
+            <div class="flex justify-between text-xs font-medium text-sky-400">
+              <span>😢 Sad</span>
+              <span id="ai-score-sad">0%</span>
+            </div>
+            <div class="w-full bg-gray-800 rounded-full h-1.5 mt-2">
+              <div id="ai-bar-sad" class="bg-sky-400 h-1.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <div class="p-3 bg-white/5 rounded-xl border border-white/5">
+            <div class="flex justify-between text-xs font-medium text-rose-400">
+              <span>😡 Angry</span>
+              <span id="ai-score-angry">0%</span>
+            </div>
+            <div class="w-full bg-gray-800 rounded-full h-1.5 mt-2">
+              <div id="ai-bar-angry" class="bg-rose-400 h-1.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <div class="p-3 bg-white/5 rounded-xl border border-white/5">
+            <div class="flex justify-between text-xs font-medium text-amber-400">
+              <span>😌 Chill</span>
+              <span id="ai-score-neutral">0%</span>
+            </div>
+            <div class="w-full bg-gray-800 rounded-full h-1.5 mt-2">
+              <div id="ai-bar-neutral" class="bg-amber-400 h-1.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ==================== VIEW 7: MY SMART PLAYLISTS ==================== -->
+    <section id="view-library" class="hidden space-y-6">
+      
+      <div class="flex items-center justify-between px-1">
+        <div>
+          <h2 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-heart text-rose-500"></i> My Smart Playlists
+          </h2>
+          <p class="text-xs text-gray-400">Liked songs are automatically arranged into each mood folder</p>
+        </div>
+      </div>
+
+      <!-- Tab Buttons for Playlists -->
+      <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
+        <button onclick="filterLibrary('all')" id="lib-all" class="px-4 py-2 rounded-xl text-xs font-semibold bg-rose-600 text-white whitespace-nowrap shadow-md">
+          ❤️ All Liked (<span id="libCountAll">0</span>)
+        </button>
+        <button onclick="filterLibrary('happy')" id="lib-happy" class="px-4 py-2 rounded-xl text-xs font-semibold bg-white/5 hover:bg-white/10 text-gray-300 whitespace-nowrap border border-white/5">
+          😊 Happy Songs (<span id="libCountHappy">0</span>)
+        </button>
+        <button onclick="filterLibrary('sad')" id="lib-sad" class="px-4 py-2 rounded-xl text-xs font-semibold bg-white/5 hover:bg-white/10 text-gray-300 whitespace-nowrap border border-white/5">
+          😢 Sad Songs (<span id="libCountSad">0</span>)
+        </button>
+        <button onclick="filterLibrary('angry')" id="lib-angry" class="px-4 py-2 rounded-xl text-xs font-semibold bg-white/5 hover:bg-white/10 text-gray-300 whitespace-nowrap border border-white/5">
+          😡 Angry Songs (<span id="libCountAngry">0</span>)
+        </button>
+        <button onclick="filterLibrary('neutral')" id="lib-neutral" class="px-4 py-2 rounded-xl text-xs font-semibold bg-white/5 hover:bg-white/10 text-gray-300 whitespace-nowrap border border-white/5">
+          😌 Chill Songs (<span id="libCountNeutral">0</span>)
+        </button>
+      </div>
+
+      <!-- Song List in Library -->
+      <div class="glass-card rounded-2xl p-4 shadow-xl border border-white/5">
+        <div id="librarySongList" class="space-y-2 max-h-[480px] overflow-y-auto no-scrollbar">
+          <p class="text-xs text-gray-500 text-center py-10">No liked songs yet. Tap ❤️ on any song to save it here!</p>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ==================== PERSISTENT BOTTOM FLOATING MINI-PLAYER ==================== -->
+  <div id="bottomMiniPlayer" class="fixed bottom-14 md:bottom-16 left-0 right-0 z-30 px-3 sm:px-6 pointer-events-none hidden">
+    <div class="max-w-3xl mx-auto glass-card rounded-2xl p-2.5 sm:p-3 shadow-2xl border border-white/10 flex items-center justify-between pointer-events-auto backdrop-blur-2xl">
+      
+      <!-- Left: Song thumbnail & title (Click opens Full Player) -->
+      <div onclick="navigateTo('player')" class="flex items-center gap-3 truncate cursor-pointer flex-1 mr-3">
+        <img id="miniArt" src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=200" alt="Cover" class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl object-cover shadow">
+        <div class="truncate">
+          <p id="miniTitle" class="text-xs sm:text-sm font-bold text-white truncate">Song Title</p>
+          <p id="miniArtist" class="text-[10px] sm:text-xs text-rose-400 truncate">Artist</p>
+        </div>
+      </div>
+
+      <!-- Right: Mini Controls -->
+      <div class="flex items-center gap-1.5 sm:gap-2">
+        <button onclick="downloadCurrentSong()" class="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-rose-400 text-xs sm:text-sm" title="Download">
+          <i class="fa-solid fa-arrow-down"></i>
+        </button>
+        <button id="miniLikeBtn" class="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-rose-400 text-sm">
+          <i id="miniLikeIcon" class="fa-regular fa-heart"></i>
+        </button>
+        <button id="miniPlayBtn" class="w-10 h-10 rounded-full bg-gradient-to-tr from-rose-600 to-indigo-600 text-white flex items-center justify-center text-sm shadow-md active:scale-95 transition">
+          <i id="miniPlayIcon" class="fa-solid fa-play ml-0.5"></i>
+        </button>
+        <button id="miniNextBtn" class="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-white text-sm">
+          <i class="fa-solid fa-forward-step"></i>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================== NATIVE BOTTOM NAVIGATION BAR (NOW 6 TABS) ==================== -->
+  <nav class="fixed bottom-0 left-0 right-0 z-40 glass-nav h-14 md:h-16 flex items-center justify-around px-1 text-gray-400 select-none">
+    
+    <button onclick="navigateTo('home')" id="nav-home" class="flex flex-col items-center justify-center gap-0.5 text-rose-400 font-semibold w-12 sm:w-16 transition">
+      <i class="fa-solid fa-house text-sm sm:text-base"></i>
+      <span class="text-[9px] sm:text-[10px]">Home</span>
+    </button>
+
+    <button onclick="navigateTo('discover')" id="nav-discover" class="flex flex-col items-center justify-center gap-0.5 hover:text-white w-12 sm:w-16 transition">
+      <i class="fa-solid fa-compass text-sm sm:text-base"></i>
+      <span class="text-[9px] sm:text-[10px]">Search</span>
+    </button>
+
+    <button onclick="navigateTo('ringtones')" id="nav-ringtones" class="flex flex-col items-center justify-center gap-0.5 hover:text-white w-12 sm:w-16 transition">
+      <i class="fa-solid fa-bell text-sm sm:text-base"></i>
+      <span class="text-[9px] sm:text-[10px]">Tones</span>
+    </button>
+
+    <button onclick="navigateTo('downloads')" id="nav-downloads" class="flex flex-col items-center justify-center gap-0.5 hover:text-white w-12 sm:w-16 transition">
+      <i class="fa-solid fa-circle-down text-sm sm:text-base"></i>
+      <span class="text-[9px] sm:text-[10px]">Saved</span>
+    </button>
+
+    <button onclick="navigateTo('player')" id="nav-player" class="flex flex-col items-center justify-center gap-0.5 hover:text-white w-12 sm:w-16 transition">
+      <i class="fa-solid fa-circle-play text-sm sm:text-base"></i>
+      <span class="text-[9px] sm:text-[10px]">Player</span>
+    </button>
+
+    <button onclick="navigateTo('library')" id="nav-library" class="flex flex-col items-center justify-center gap-0.5 hover:text-white w-12 sm:w-16 transition">
+      <i class="fa-solid fa-bookmark text-sm sm:text-base"></i>
+      <span class="text-[9px] sm:text-[10px]">Playlists</span>
+    </button>
+
+  </nav>
+
+  <!-- Global Audio Element -->
+  <audio id="globalAudio" preload="none" crossorigin="anonymous"></audio>
+
+  <!-- Application Logic -->
+  <script>
+    // State
+    let currentView = 'home';
+    let songsData = { happy: [], sad: [], angry: [], neutral: [] };
+    let ringtonesData = [];
+    let activeFeedPlaylist = [];
+    let currentTrackIndex = -1;
+    let isPlaying = false;
+    let selectedMood = 'happy';
+    let libraryActiveFilter = 'all';
+
+    // Camera State
+    let isCameraRunning = false;
+    let cameraStream = null;
+    let currentDetectedEmotion = null;
+    let detectInterval = null;
+
+    // Elements
+    const audio = document.getElementById('globalAudio');
+    const bottomMiniPlayer = document.getElementById('bottomMiniPlayer');
+    const miniTitle = document.getElementById('miniTitle');
+    const miniArtist = document.getElementById('miniArtist');
+    const miniArt = document.getElementById('miniArt');
+    const miniPlayBtn = document.getElementById('miniPlayBtn');
+    const miniPlayIcon = document.getElementById('miniPlayIcon');
+    const miniNextBtn = document.getElementById('miniNextBtn');
+    const miniLikeBtn = document.getElementById('miniLikeBtn');
+    const miniLikeIcon = document.getElementById('miniLikeIcon');
+
+    // Full Player
+    const fullTitle = document.getElementById('fullTitle');
+    const fullArtist = document.getElementById('fullArtist');
+    const playerVinylImg = document.getElementById('playerVinylImg');
+    const fullPlayBtn = document.getElementById('fullPlayBtn');
+    const fullPlayIcon = document.getElementById('fullPlayIcon');
+    const fullPrevBtn = document.getElementById('fullPrevBtn');
+    const fullNextBtn = document.getElementById('fullNextBtn');
+    const fullLikeBtn = document.getElementById('fullLikeBtn');
+    const fullLikeIcon = document.getElementById('fullLikeIcon');
+    const fullProgress = document.getElementById('fullProgress');
+    const fullCurrentTime = document.getElementById('fullCurrentTime');
+    const fullTotalTime = document.getElementById('fullTotalTime');
+    const fullVolumeSlider = document.getElementById('fullVolumeSlider');
+    const fullPlayerEqualizer = document.getElementById('fullPlayerEqualizer');
+
+    // Feeds
+    const homeFeaturedList = document.getElementById('homeFeaturedList');
+    const songFeedList = document.getElementById('songFeedList');
+    const ringtonesFeedList = document.getElementById('ringtonesFeedList');
+    const downloadsFeedList = document.getElementById('downloadsFeedList');
+    const feedTitle = document.getElementById('feedTitle');
+    const feedCount = document.getElementById('feedCount');
+    const musicSearchInput = document.getElementById('musicSearchInput');
+    const searchBtn = document.getElementById('searchBtn');
+
+    // Navigation Switcher
+    function navigateTo(viewName) {
+      currentView = viewName;
+      ['home', 'discover', 'ringtones', 'downloads', 'player', 'ai', 'library'].forEach(v => {
+        const sec = document.getElementById(`view-${v}`);
+        const navBtn = document.getElementById(`nav-${v}`);
+        if (sec) {
+          if (v === viewName) {
+            sec.classList.remove('hidden');
+          } else {
+            sec.classList.add('hidden');
+          }
+        }
+        if (navBtn) {
+          if (v === viewName) {
+            navBtn.classList.add('text-rose-400', 'font-semibold');
+            navBtn.classList.remove('text-gray-400');
+          } else {
+            navBtn.classList.remove('text-rose-400', 'font-semibold');
+            navBtn.classList.add('text-gray-400');
+          }
+        }
+      });
+      if (viewName === 'downloads') renderDownloadsView();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Storage Management (Playlists + Downloads)
+    function getStoredPlaylists() {
+      const saved = localStorage.getItem('moodbeat_v2_playlists');
+      if (saved) {
+        try { return JSON.parse(saved); } catch(e) {}
+      }
+      return { happy: [], sad: [], angry: [], neutral: [], favorites: [] };
+    }
+
+    function saveUserPlaylists(store) {
+      localStorage.setItem('moodbeat_v2_playlists', JSON.stringify(store));
+      updateCounts();
+    }
+
+    function getStoredDownloads() {
+      const saved = localStorage.getItem('moodbeat_downloads');
+      if (saved) {
+        try { return JSON.parse(saved); } catch(e) {}
+      }
+      return [];
+    }
+
+    function saveDownloadRecord(track) {
+      const downloads = getStoredDownloads();
+      if (!downloads.some(d => d.id === track.id || (d.title === track.title && d.artist === track.artist))) {
+        downloads.unshift({
+          ...track,
+          downloadDate: new Date().toLocaleDateString()
+        });
+        localStorage.setItem('moodbeat_downloads', JSON.stringify(downloads));
+      }
+      updateCounts();
+    }
+
+    function updateCounts() {
+      const store = getStoredPlaylists();
+      document.getElementById('libCountAll').textContent = store.favorites?.length || 0;
+      document.getElementById('libCountHappy').textContent = store.happy?.length || 0;
+      document.getElementById('libCountSad').textContent = store.sad?.length || 0;
+      document.getElementById('libCountAngry').textContent = store.angry?.length || 0;
+      document.getElementById('libCountNeutral').textContent = store.neutral?.length || 0;
+
+      const downloads = getStoredDownloads();
+      document.getElementById('topDlCount').textContent = downloads.length;
+    }
+
+    function getCurrentSong() {
+      if (currentTrackIndex < 0 || !activeFeedPlaylist[currentTrackIndex]) return null;
+      return activeFeedPlaylist[currentTrackIndex];
+    }
+
+    function isSongLiked(song) {
+      if (!song) return false;
+      const store = getStoredPlaylists();
+      return store.favorites.some(s => s.id === song.id || (s.title === song.title && s.artist === song.artist));
+    }
+
+    function updateLikeButtonsUI() {
+      const current = getCurrentSong();
+      const liked = isSongLiked(current);
+      if (liked) {
+        miniLikeIcon.className = "fa-solid fa-heart text-rose-500";
+        fullLikeIcon.className = "fa-solid fa-heart text-rose-500";
+        fullLikeBtn.classList.add('bg-rose-500/20', 'border-rose-500/40');
+      } else {
+        miniLikeIcon.className = "fa-regular fa-heart";
+        fullLikeIcon.className = "fa-regular fa-heart";
+        fullLikeBtn.classList.remove('bg-rose-500/20', 'border-rose-500/40');
+      }
+    }
+
+    function toggleLikeCurrentSong() {
+      const song = getCurrentSong();
+      if (!song) return;
+
+      const store = getStoredPlaylists();
+      const mood = song.mood || selectedMood || 'happy';
+      const idx = store.favorites.findIndex(s => s.id === song.id || (s.title === song.title && s.artist === song.artist));
+
+      if (idx > -1) {
+        store.favorites.splice(idx, 1);
+        if (store[mood]) store[mood] = store[mood].filter(s => s.id !== song.id && s.title !== song.title);
+      } else {
+        store.favorites.unshift(song);
+        if (!store[mood]) store[mood] = [];
+        if (!store[mood].some(s => s.id === song.id || s.title === song.title)) {
+          store[mood].unshift(song);
+        }
+      }
+
+      saveUserPlaylists(store);
+      updateLikeButtonsUI();
+      renderFeedList(activeFeedPlaylist);
+      if (currentView === 'library') filterLibrary(libraryActiveFilter);
+    }
+
+    miniLikeBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleLikeCurrentSong(); });
+    fullLikeBtn.addEventListener('click', toggleLikeCurrentSong);
+
+    // Download Functionality
+    function triggerDownload(track) {
+      if (!track || !track.url) return;
+      saveDownloadRecord(track);
+
+      // Trigger actual file download via backend proxy to save directly to phone/pc
+      const filename = `${track.title.replace(/[^\w\s-]/gi, '')}_MoodBeat.mp3`;
+      const downloadUrl = `/api/download?url=${encodeURIComponent(track.url)}&filename=${encodeURIComponent(filename)}`;
+      
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function downloadCurrentSong() {
+      const track = getCurrentSong();
+      if (track) triggerDownload(track);
+    }
+
+    // Initial Data Fetch
+    async function initApp() {
+      try {
+        const [songsRes, rtRes] = await Promise.all([
+          fetch('/api/songs'),
+          fetch('/api/ringtones')
+        ]);
+        songsData = await songsRes.json();
+        ringtonesData = await rtRes.json();
+
+        updateCounts();
+        renderHomeFeatured();
+        renderRingtonesView();
+        switchDiscoverTab('happy');
+      } catch (e) {
+        console.error("API error:", e);
+      }
+      loadFaceAI();
+    }
+
+    function renderHomeFeatured() {
+      homeFeaturedList.innerHTML = '';
+      const allSamples = [...(songsData.happy || []), ...(songsData.sad || []), ...(songsData.angry || []), ...(songsData.neutral || [])];
+      
+      allSamples.slice(0, 6).forEach((track, idx) => {
+        const card = document.createElement('div');
+        card.className = "flex items-center justify-between p-3 rounded-2xl bg-white/5 hover:bg-white/10 transition cursor-pointer border border-white/5";
+        card.innerHTML = `
+          <div class="flex items-center gap-3 truncate">
+            <img src="${track.cover}" class="w-12 h-12 rounded-xl object-cover shadow" />
+            <div class="truncate">
+              <p class="text-xs sm:text-sm font-semibold text-white truncate">${track.title}</p>
+              <p class="text-[10px] text-gray-400 truncate">${track.artist} &bull; <span class="text-rose-400 capitalize">${track.mood}</span></p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="event.stopPropagation(); triggerDownload(activeFeedPlaylist[${idx}])" class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white flex items-center justify-center text-xs">
+              <i class="fa-solid fa-arrow-down"></i>
+            </button>
+            <button class="w-8 h-8 rounded-full bg-rose-600/80 hover:bg-rose-600 text-white flex items-center justify-center text-xs shadow-md">
+              <i class="fa-solid fa-play ml-0.5"></i>
+            </button>
+          </div>
+        `;
+        card.onclick = () => {
+          activeFeedPlaylist = allSamples;
+          loadSong(idx, true);
+        };
+        homeFeaturedList.appendChild(card);
+      });
+    }
+
+    function openStation(mood) {
+      navigateTo('discover');
+      switchDiscoverTab(mood);
+    }
+
+    function switchDiscoverTab(mood) {
+      selectedMood = mood;
+      ['happy', 'sad', 'angry', 'neutral'].forEach(m => {
+        const btn = document.getElementById(`tab-${m}`);
+        if (btn) {
+          if (m === mood) {
+            btn.className = "px-4 py-2 rounded-xl text-xs font-semibold bg-rose-600 text-white whitespace-nowrap shadow-md";
+          } else {
+            btn.className = "px-4 py-2 rounded-xl text-xs font-semibold bg-white/5 text-gray-400 hover:text-white whitespace-nowrap";
+          }
+        }
+      });
+
+      const moodTitles = {
+        happy: "😊 Energetic & Happy Hits",
+        sad: "😢 Soulful & Melancholy Tracks",
+        angry: "🔥 High Bass & Workout Rock",
+        neutral: "☕ Cozy Lo-Fi & Relaxation"
+      };
+      feedTitle.innerHTML = `<i class="fa-solid fa-music text-rose-500"></i> ${moodTitles[mood] || 'Songs'}`;
+
+      const store = getStoredPlaylists();
+      const userMoodSongs = store[mood] || [];
+      const defaultSongs = songsData[mood] || [];
+
+      const merged = [...userMoodSongs];
+      defaultSongs.forEach(ds => {
+        if (!merged.some(m => m.id === ds.id)) merged.push(ds);
+      });
+
+      activeFeedPlaylist = merged;
+      feedCount.textContent = `${activeFeedPlaylist.length} Songs`;
+      renderFeedList(activeFeedPlaylist);
+    }
+
+    function renderFeedList(tracks) {
+      songFeedList.innerHTML = '';
+      if (!tracks || tracks.length === 0) {
+        songFeedList.innerHTML = `<p class="text-xs text-gray-500 text-center py-8">No tracks found. Try searching another keyword!</p>`;
+        return;
+      }
+
+      tracks.forEach((track, idx) => {
+        const isCurrent = currentTrackIndex === idx;
+        const liked = isSongLiked(track);
+        const item = document.createElement('div');
+        item.className = `flex items-center justify-between p-2.5 rounded-2xl cursor-pointer hover:bg-white/5 transition border border-transparent ${isCurrent ? 'bg-rose-500/15 border-rose-500/30 text-rose-300' : 'text-gray-200'}`;
+        item.innerHTML = `
+          <div class="flex items-center gap-3 truncate">
+            <img src="${track.cover}" class="w-10 h-10 rounded-xl object-cover shadow" />
+            <div class="truncate">
+              <p class="text-xs sm:text-sm font-semibold truncate ${isCurrent ? 'text-rose-400 font-bold' : ''}">${track.title}</p>
+              <p class="text-[10px] text-gray-400 truncate">${track.artist} &bull; <span class="text-gray-500">${track.album || ''}</span></p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 flex-shrink-0">
+            ${liked ? '<i class="fa-solid fa-heart text-rose-500 text-xs"></i>' : ''}
+            <button onclick="event.stopPropagation(); triggerDownload(activeFeedPlaylist[${idx}])" class="w-7 h-7 rounded-full bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white flex items-center justify-center text-[10px]" title="Download Song">
+              <i class="fa-solid fa-arrow-down"></i>
+            </button>
+            <button class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-gray-300 text-xs">
+              <i class="fa-solid fa-${isCurrent && isPlaying ? 'pause' : 'play'}"></i>
+            </button>
+          </div>
+        `;
+        item.onclick = () => loadSong(idx, true);
+        songFeedList.appendChild(item);
+      });
+    }
+
+    // Ringtones Section Render
+    function renderRingtonesView() {
+      ringtonesFeedList.innerHTML = '';
+      if (!ringtonesData || ringtonesData.length === 0) {
+        ringtonesFeedList.innerHTML = `<p class="text-xs text-gray-500 text-center py-8">No ringtones loaded.</p>`;
+        return;
+      }
+
+      ringtonesData.forEach((tone, idx) => {
+        const item = document.createElement('div');
+        item.className = "flex items-center justify-between p-3 rounded-2xl bg-white/5 hover:bg-white/10 transition cursor-pointer border border-white/5";
+        item.innerHTML = `
+          <div class="flex items-center gap-3 truncate">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-rose-500/20 to-purple-500/20 flex items-center justify-center text-rose-400">
+              <i class="fa-solid fa-bell text-sm"></i>
+            </div>
+            <div class="truncate">
+              <p class="text-xs sm:text-sm font-semibold text-white truncate">${tone.title}</p>
+              <p class="text-[10px] text-gray-400 truncate">${tone.artist} &bull; <span class="text-rose-400">${tone.category}</span></p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 flex-shrink-0">
+            <span class="text-[10px] text-gray-500 font-mono">${tone.duration}</span>
+            <button onclick="event.stopPropagation(); triggerDownload(ringtonesData[${idx}])" class="px-2.5 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30 text-xs flex items-center gap-1">
+              <i class="fa-solid fa-arrow-down text-[10px]"></i> Download
+            </button>
+            <button class="w-8 h-8 rounded-full bg-rose-600/80 hover:bg-rose-600 text-white flex items-center justify-center text-xs">
+              <i class="fa-solid fa-play ml-0.5"></i>
+            </button>
+          </div>
+        `;
+        item.onclick = () => {
+          activeFeedPlaylist = ringtonesData;
+          loadSong(idx, true);
+        };
+        ringtonesFeedList.appendChild(item);
+      });
+    }
+
+    // Downloads Section Render
+    function renderDownloadsView() {
+      const downloads = getStoredDownloads();
+      downloadsFeedList.innerHTML = '';
+
+      if (downloads.length === 0) {
+        downloadsFeedList.innerHTML = `<div class="p-8 text-center text-xs text-gray-500">No downloaded songs yet. Click the ⬇️ button on any track to download!</div>`;
+        return;
+      }
+
+      downloads.forEach((track, idx) => {
+        const item = document.createElement('div');
+        item.className = "flex items-center justify-between p-3 rounded-2xl bg-white/5 hover:bg-white/10 transition cursor-pointer border border-white/5";
+        item.innerHTML = `
+          <div class="flex items-center gap-3 truncate">
+            <img src="${track.cover}" class="w-10 h-10 rounded-xl object-cover shadow" />
+            <div class="truncate">
+              <p class="text-xs sm:text-sm font-semibold text-white truncate">${track.title}</p>
+              <p class="text-[10px] text-emerald-400 truncate">Saved Offline &bull; ${track.downloadDate || 'Downloaded'}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="event.stopPropagation(); triggerDownload(getStoredDownloads()[${idx}])" class="px-2.5 py-1 rounded-xl bg-white/5 hover:bg-white/10 text-gray-300 text-xs flex items-center gap-1 border border-white/10">
+              <i class="fa-solid fa-download text-[10px]"></i> Re-Save
+            </button>
+            <button class="w-8 h-8 rounded-full bg-rose-600/80 hover:bg-rose-600 text-white flex items-center justify-center text-xs">
+              <i class="fa-solid fa-play ml-0.5"></i>
+            </button>
+          </div>
+        `;
+        item.onclick = () => {
+          activeFeedPlaylist = downloads;
+          loadSong(idx, true);
+        };
+        downloadsFeedList.appendChild(item);
+      });
+    }
+
+    function clearAllDownloads() {
+      if (confirm("Clear all download records?")) {
+        localStorage.removeItem('moodbeat_downloads');
+        updateCounts();
+        renderDownloadsView();
+      }
+    }
+
+    // Load & Play Song (Only on User Click)
+    function loadSong(index, shouldPlay = true) {
+      if (!activeFeedPlaylist[index]) return;
+      currentTrackIndex = index;
+      const track = activeFeedPlaylist[index];
+
+      bottomMiniPlayer.classList.remove('hidden');
+
+      miniTitle.textContent = track.title;
+      miniArtist.textContent = track.artist || "Audio Song";
+      miniArt.src = track.cover;
+
+      fullTitle.textContent = track.title;
+      fullArtist.textContent = track.artist || "Audio Song";
+      playerVinylImg.src = track.cover;
+
+      audio.src = track.url;
+      if (shouldPlay) {
+        audio.play().then(() => {
+          isPlaying = true;
+          updatePlayStateUI();
+        }).catch(e => console.log("Play gesture handled:", e));
+      }
+
+      updateLikeButtonsUI();
+      renderFeedList(activeFeedPlaylist);
+    }
+
+    function updatePlayStateUI() {
+      if (isPlaying) {
+        miniPlayIcon.className = "fa-solid fa-pause";
+        fullPlayIcon.className = "fa-solid fa-pause";
+        playerVinylImg.classList.remove('vinyl-paused');
+        fullPlayerEqualizer.classList.remove('hidden');
+        fullPlayerEqualizer.classList.add('playing');
+      } else {
+        miniPlayIcon.className = "fa-solid fa-play ml-0.5";
+        fullPlayIcon.className = "fa-solid fa-play ml-1";
+        playerVinylImg.classList.add('vinyl-paused');
+        fullPlayerEqualizer.classList.remove('playing');
+        fullPlayerEqualizer.classList.add('hidden');
+      }
+    }
+
+    // Playback Listeners
+    function togglePlay() {
+      if (!audio.src) {
+        if (activeFeedPlaylist.length > 0) loadSong(0, true);
+        return;
+      }
+      if (audio.paused) {
+        audio.play();
+        isPlaying = true;
+      } else {
+        audio.pause();
+        isPlaying = false;
+      }
+      updatePlayStateUI();
+    }
+
+    function playNext() {
+      if (activeFeedPlaylist.length === 0) return;
+      const nextIdx = (currentTrackIndex + 1) % activeFeedPlaylist.length;
+      loadSong(nextIdx, true);
+    }
+
+    function playPrev() {
+      if (activeFeedPlaylist.length === 0) return;
+      const prevIdx = (currentTrackIndex - 1 + activeFeedPlaylist.length) % activeFeedPlaylist.length;
+      loadSong(prevIdx, true);
+    }
+
+    miniPlayBtn.addEventListener('click', (e) => { e.stopPropagation(); togglePlay(); });
+    fullPlayBtn.addEventListener('click', togglePlay);
+    miniNextBtn.addEventListener('click', (e) => { e.stopPropagation(); playNext(); });
+    fullNextBtn.addEventListener('click', playNext);
+    fullPrevBtn.addEventListener('click', playPrev);
+
+    audio.addEventListener('timeupdate', () => {
+      if (audio.duration) {
+        const pct = (audio.currentTime / audio.duration) * 100;
+        fullProgress.value = pct;
+        fullCurrentTime.textContent = formatSec(audio.currentTime);
+        fullTotalTime.textContent = formatSec(audio.duration);
+      }
+    });
+
+    audio.addEventListener('ended', playNext);
+
+    fullProgress.addEventListener('input', (e) => {
+      if (audio.duration) audio.currentTime = (e.target.value / 100) * audio.duration;
+    });
+
+    fullVolumeSlider.addEventListener('input', (e) => {
+      audio.volume = e.target.value;
+    });
+
+    function formatSec(sec) {
+      if (isNaN(sec)) return "0:00";
+      const m = Math.floor(sec / 60);
+      const s = Math.floor(sec % 60);
+      return `${m}:${s < 10 ? '0' : ''}${s}`;
+    }
+
+    // Search Online Music: Up to 40+ Full 320kbps Songs
+    async function performSearch(query) {
+      if (!query || query.trim() === '') return;
+      navigateTo('discover');
+      musicSearchInput.value = query;
+
+      feedTitle.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-rose-500"></i> Searching "${query}"...`;
+      songFeedList.innerHTML = `<p class="text-xs text-gray-400 text-center py-10 flex items-center justify-center gap-2"><i class="fa-solid fa-circle-notch fa-spin"></i> Loading 40+ full tracks...</p>`;
+
+      let results = [];
+
+      try {
+        const res = await fetch(`https://saavn.dev/api/search/songs?query=${encodeURIComponent(query)}&limit=40`);
+        const json = await res.json();
+        if (json?.success && json?.data?.results?.length > 0) {
+          results = json.data.results.map(item => {
+            let bestUrl = '';
+            if (item.downloadUrl && item.downloadUrl.length > 0) {
+              const bestQuality = item.downloadUrl.find(d => d.quality === '320kbps') || item.downloadUrl[item.downloadUrl.length - 1];
+              bestUrl = bestQuality.url || item.downloadUrl[0].url;
+            }
+
+            const img = (item.image && item.image.length > 0)
+              ? (item.image[item.image.length - 1].url || item.image[0].url)
+              : 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500';
+
+            return {
+              id: item.id || Math.random().toString(),
+              title: item.name.replace(/&quot;/g, '"').replace(/&#039;/g, "'").replace(/&amp;/g, '&'),
+              artist: item.artists?.primary?.map(a => a.name).join(', ') || 'Various Artists',
+              album: item.album?.name || 'Full Track',
+              cover: img,
+              url: bestUrl,
+              duration: formatSec(item.duration),
+              mood: selectedMood,
+              type: "song"
+            };
+          }).filter(t => t.url);
+        }
+      } catch (err) {}
+
+      if (results.length === 0) {
+        try {
+          const itunesRes = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=music&entity=song&limit=40`);
+          const itunesJson = await itunesRes.json();
+          if (itunesJson?.results?.length > 0) {
+            results = itunesJson.results.map(item => ({
+              id: item.trackId ? item.trackId.toString() : Math.random().toString(),
+              title: item.trackName,
+              artist: item.artistName,
+              album: item.collectionName || 'Single',
+              cover: item.artworkUrl100 ? item.artworkUrl100.replace('100x100bb', '500x500bb') : 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500',
+              url: item.previewUrl,
+              duration: formatSec(Math.round(item.trackTimeMillis / 1000)),
+              mood: selectedMood,
+              type: "song"
+            }));
+          }
+        } catch (e2) {}
+      }
+
+      if (results.length > 0) {
+        activeFeedPlaylist = results;
+        feedTitle.innerHTML = `<i class="fa-solid fa-search text-rose-500"></i> Results for "${query}"`;
+        feedCount.textContent = `${results.length} Full Songs`;
+        renderFeedList(results);
+      } else {
+        feedTitle.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-amber-500"></i> No Songs Found`;
+        songFeedList.innerHTML = `<p class="text-xs text-gray-500 text-center py-10">No audio tracks found for "${query}". Try another artist or song!</p>`;
+      }
+    }
+
+    searchBtn.addEventListener('click', () => performSearch(musicSearchInput.value));
+    musicSearchInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') performSearch(musicSearchInput.value);
+    });
+
+    // Library Tab Filtering
+    function filterLibrary(filterName) {
+      libraryActiveFilter = filterName;
+      ['all', 'happy', 'sad', 'angry', 'neutral'].forEach(f => {
+        const btn = document.getElementById(`lib-${f}`);
+        if (btn) {
+          if (f === filterName) {
+            btn.className = "px-4 py-2 rounded-xl text-xs font-semibold bg-rose-600 text-white whitespace-nowrap shadow-md";
+          } else {
+            btn.className = "px-4 py-2 rounded-xl text-xs font-semibold bg-white/5 hover:bg-white/10 text-gray-300 whitespace-nowrap border border-white/5";
+          }
+        }
+      });
+
+      const store = getStoredPlaylists();
+      let list = (filterName === 'all') ? (store.favorites || []) : (store[filterName] || []);
+
+      const container = document.getElementById('librarySongList');
+      container.innerHTML = '';
+
+      if (list.length === 0) {
+        container.innerHTML = `<p class="text-xs text-gray-500 text-center py-10">No songs saved in ${filterName.toUpperCase()} yet. Tap ❤️ on any song to save it!</p>`;
+        return;
+      }
+
+      list.forEach((track, idx) => {
+        const item = document.createElement('div');
+        item.className = "flex items-center justify-between p-2.5 rounded-2xl cursor-pointer hover:bg-white/5 transition text-gray-200 border border-transparent";
+        item.innerHTML = `
+          <div class="flex items-center gap-3 truncate">
+            <img src="${track.cover}" class="w-10 h-10 rounded-xl object-cover shadow" />
+            <div class="truncate">
+              <p class="text-xs sm:text-sm font-semibold truncate">${track.title}</p>
+              <p class="text-[10px] text-gray-400 truncate">${track.artist} &bull; <span class="text-rose-400">${track.mood || ''}</span></p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="event.stopPropagation(); triggerDownload(getStoredPlaylists()['${filterName === 'all' ? 'favorites' : filterName}'][${idx}])" class="w-7 h-7 rounded-full bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white flex items-center justify-center text-[10px]">
+              <i class="fa-solid fa-arrow-down"></i>
+            </button>
+            <i class="fa-solid fa-heart text-rose-500 text-xs mr-1"></i>
+            <button class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-gray-300 text-xs">
+              <i class="fa-solid fa-play"></i>
+            </button>
+          </div>
+        `;
+        item.onclick = () => {
+          activeFeedPlaylist = list;
+          loadSong(idx, true);
+          navigateTo('player');
+        };
+        container.appendChild(item);
+      });
+    }
+
+    // Face-API & Camera
+    async function loadFaceAI() {
+      try {
+        const URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
+        await Promise.all([
+          faceapi.nets.tinyFaceDetector.loadFromUri(URL),
+          faceapi.nets.faceExpressionNet.loadFromUri(URL)
+        ]);
+      } catch (err) {}
+    }
+
+    const cameraActionBtn = document.getElementById('cameraActionBtn');
+    const camInactiveCard = document.getElementById('camInactiveCard');
+    const videoFeed = document.getElementById('videoFeed');
+    const overlayCanvas = document.getElementById('overlayCanvas');
+    const liveMoodCard = document.getElementById('liveMoodCard');
+    const liveMoodEmoji = document.getElementById('liveMoodEmoji');
+    const liveMoodName = document.getElementById('liveMoodName');
+    const liveMoodScore = document.getElementById('liveMoodScore');
+
+    cameraActionBtn.addEventListener('click', () => {
+      if (!isCameraRunning) startCamera();
+      else stopCamera();
+    });
+
+    async function startCamera() {
+      try {
+        cameraStream = await navigator.mediaDevices.getUserMedia({ 
+          video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: "user" }
+        });
+        videoFeed.srcObject = cameraStream;
+        videoFeed.classList.remove('hidden');
+        overlayCanvas.classList.remove('hidden');
+        camInactiveCard.classList.add('hidden');
+        liveMoodCard.classList.remove('hidden');
+
+        cameraActionBtn.innerHTML = '<i class="fa-solid fa-stop mr-1"></i> Stop Camera';
+        cameraActionBtn.classList.replace('bg-indigo-600', 'bg-rose-600');
+        isCameraRunning = true;
+
+        videoFeed.onloadedmetadata = () => {
+          overlayCanvas.width = videoFeed.videoWidth;
+          overlayCanvas.height = videoFeed.videoHeight;
+          runFaceLoop();
+        };
+      } catch (e) {
+        alert("Camera permission denied: " + e.message);
+      }
+    }
+
+    function stopCamera() {
+      if (cameraStream) cameraStream.getTracks().forEach(t => t.stop());
+      clearInterval(detectInterval);
+      videoFeed.classList.add('hidden');
+      overlayCanvas.classList.add('hidden');
+      camInactiveCard.classList.remove('hidden');
+      liveMoodCard.classList.add('hidden');
+
+      cameraActionBtn.innerHTML = '<i class="fa-solid fa-video mr-1"></i> Start Camera';
+      cameraActionBtn.classList.replace('bg-rose-600', 'bg-indigo-600');
+      isCameraRunning = false;
+    }
+
+    function runFaceLoop() {
+      const displaySize = { width: videoFeed.videoWidth, height: videoFeed.videoHeight };
+      faceapi.matchDimensions(overlayCanvas, displaySize);
+
+      detectInterval = setInterval(async () => {
+        if (!isCameraRunning) return;
+        const detections = await faceapi.detectSingleFace(videoFeed, new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.5 }))
+          .withFaceExpressions();
+
+        const ctx = overlayCanvas.getContext('2d');
+        ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+
+        if (detections) {
+          const resized = faceapi.resizeResults(detections, displaySize);
+          ctx.strokeStyle = '#f43f5e';
+          ctx.lineWidth = 3;
+          ctx.strokeRect(resized.detection.box.x, resized.detection.box.y, resized.detection.box.width, resized.detection.box.height);
+
+          const exp = detections.expressions;
+          const h = Math.round((exp.happy || 0) * 100);
+          const s = Math.round((exp.sad || 0) * 100);
+          const a = Math.round((exp.angry || 0) * 100);
+          const n = Math.round(((exp.neutral || 0) + (exp.surprised || 0)) * 100);
+
+          document.getElementById('ai-score-happy').textContent = `${h}%`;
+          document.getElementById('ai-bar-happy').style.width = `${h}%`;
+          document.getElementById('ai-score-sad').textContent = `${s}%`;
+          document.getElementById('ai-bar-sad').style.width = `${s}%`;
+          document.getElementById('ai-score-angry').textContent = `${a}%`;
+          document.getElementById('ai-bar-angry').style.width = `${a}%`;
+          document.getElementById('ai-score-neutral').textContent = `${Math.min(100, n)}%`;
+          document.getElementById('ai-bar-neutral').style.width = `${Math.min(100, n)}%`;
+
+          let dominant = 'neutral';
+          let maxVal = 0;
+          ['happy', 'sad', 'angry'].forEach(e => {
+            if (exp[e] > maxVal) { maxVal = exp[e]; dominant = e; }
+          });
+
+          const emojis = { happy: '😊', sad: '😢', angry: '😡', neutral: '😌' };
+          liveMoodEmoji.textContent = emojis[dominant] || '😌';
+          liveMoodName.textContent = dominant;
+          liveMoodScore.textContent = `${Math.round(maxVal * 100)}%`;
+
+          if (maxVal > 0.45 && dominant !== currentDetectedEmotion) {
+            currentDetectedEmotion = dominant;
+            switchDiscoverTab(dominant);
+            if (activeFeedPlaylist.length > 0) {
+              const randIdx = Math.floor(Math.random() * activeFeedPlaylist.length);
+              loadSong(randIdx, true);
+            }
+          }
+        }
+      }, 200);
+    }
+
+    // Launch App
+    initApp();
+  </script>
+</body>
+</html>
