@@ -1,17 +1,53 @@
 import os
 import json
+import sqlite3
 import urllib.request
 import urllib.parse
-from flask import Flask, render_template, jsonify, request, send_from_directory, Response
+from flask import Flask, render_template, jsonify, request, send_from_directory, Response, session
 from flask_cors import CORS
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
+app.secret_key = "moodbeat_ultra_secret_key_2026_secured"
 CORS(app)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MUSIC_DIR = os.path.join(BASE_DIR, "music")
+DB_PATH = os.path.join(BASE_DIR, "moodbeat.db")
 
-# Curated High Quality Full Songs
+# ==================== SQLITE DATABASE INITIALIZATION ====================
+def init_db():
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    # Users table with secure password hash
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            email TEXT UNIQUE NOT NULL,
+            password TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    # User downloads & favorites table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS user_activity (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            track_title TEXT,
+            track_artist TEXT,
+            track_url TEXT,
+            activity_type TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users (id)
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+init_db()
+
+# Full Length Default Fallback Audio Library (High Quality Full MP3 Streams)
 FULL_AUDIO_LIBRARY = {
     "happy": [
         {
@@ -89,7 +125,6 @@ FULL_AUDIO_LIBRARY = {
     ]
 }
 
-# Authentic Trending Hindi & Pakistani Ringtones
 CURATED_RINGTONES = [
     {
         "id": "rt_1",
@@ -177,13 +212,66 @@ CURATED_RINGTONES = [
 def index():
     return render_template("index.html")
 
+# ==================== STRICT SQLITE AUTHENTICATION APIS ====================
+@app.route("/api/auth/register", methods=["POST"])
+def auth_register():
+    data = request.get_json() or {}
+    name = data.get("name", "").strip()
+    email = data.get("email", "").strip().lower()
+    password = data.get("password", "")
+
+    if not name or not email or not password:
+        return jsonify({"success": False, "error": "All fields (Name, Email, Password) are required!"}), 400
+
+    if len(password) < 4:
+        return jsonify({"success": False, "error": "Password must be at least 4 characters long!"}), 400
+
+    hashed_pw = generate_password_hash(password)
+
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    try:
+        cursor.execute("INSERT INTO users (name, email, password) VALUES (?, ?, ?)", (name, email, hashed_pw))
+        conn.commit()
+        user_id = cursor.lastrowid
+        conn.close()
+        return jsonify({"success": True, "user": {"id": user_id, "name": name, "email": email}})
+    except sqlite3.IntegrityError:
+        conn.close()
+        return jsonify({"success": False, "error": "An account with this email already exists! Please Login."}), 400
+    except Exception as e:
+        conn.close()
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route("/api/auth/login", methods=["POST"])
+def auth_login():
+    data = request.get_json() or {}
+    email = data.get("email", "").strip().lower()
+    password = data.get("password", "")
+
+    if not email or not password:
+        return jsonify({"success": False, "error": "Email and Password are required!"}), 400
+
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, name, email, password FROM users WHERE email = ?", (email,))
+    row = cursor.fetchone()
+    conn.close()
+
+    if not row:
+        return jsonify({"success": False, "error": "Account not found. Please Create an Account first!"}), 404
+
+    user_id, name, email_db, hashed_pw = row
+    if not check_password_hash(hashed_pw, password):
+        return jsonify({"success": False, "error": "Incorrect password! Please try again."}), 401
+
+    return jsonify({"success": True, "user": {"id": user_id, "name": name, "email": email_db}})
+
 @app.route("/api/songs")
 def get_songs():
     data = {}
     for mood, tracks in FULL_AUDIO_LIBRARY.items():
         data[mood] = list(tracks)
-        
-        # Local files if available
         local_folder = os.path.join(MUSIC_DIR, mood)
         if os.path.exists(local_folder):
             for file in os.listdir(local_folder):
@@ -239,7 +327,7 @@ def serve_music(emotion, filename):
 
 if __name__ == "__main__":
     print("==========================================================")
-    print("  MOODBEAT AI - FULL MUSIC, RINGTONES & AUTH PORTAL")
+    print("  MOODBEAT AI - SECURED SQLITE AUTH & FULL MUSIC ENGINE")
     print("  Local PC: http://localhost:5000")
     print("  Mobile:   http://192.168.1.9:5000")
     print("==========================================================")
