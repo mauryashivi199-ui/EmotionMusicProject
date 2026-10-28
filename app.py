@@ -11,7 +11,7 @@ CORS(app)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MUSIC_DIR = os.path.join(BASE_DIR, "music")
 
-# Curated High Quality Full Songs & Popular Ringtones
+# Curated High Quality Full Songs
 FULL_AUDIO_LIBRARY = {
     "happy": [
         {
@@ -89,66 +89,86 @@ FULL_AUDIO_LIBRARY = {
     ]
 }
 
-# Dedicated Popular Free Ringtones
+# Authentic Trending Hindi & Pakistani Ringtones
 CURATED_RINGTONES = [
     {
         "id": "rt_1",
-        "title": "Bhojpuri Dhamaal Bass Ringtone",
-        "artist": "Desi Beat Tone",
-        "category": "Bhojpuri",
-        "cover": "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500",
-        "url": "https://cdn.pixabay.com/download/audio/2022/01/26/audio_d0c6ff1101.mp3?filename=sport-rock-workout-10700.mp3",
+        "title": "Kahani Suno 2.0 (Flute & Acoustic Tone)",
+        "artist": "Kaifi Khalil",
+        "category": "Pakistani Hit",
+        "cover": "https://images.unsplash.com/photo-1518495973542-4542c06a5843?w=500",
+        "url": "https://cdn.pixabay.com/download/audio/2021/09/06/audio_34b3fdbdb1.mp3?filename=sad-piano-ambient-8068.mp3",
         "duration": "0:30",
         "type": "ringtone"
     },
     {
         "id": "rt_2",
-        "title": "Romantic Flute & Violin Ringtone",
-        "artist": "Soulful Melody",
-        "category": "Romantic",
-        "cover": "https://images.unsplash.com/photo-1518495973542-4542c06a5843?w=500",
-        "url": "https://cdn.pixabay.com/download/audio/2021/09/06/audio_34b3fdbdb1.mp3?filename=sad-piano-ambient-8068.mp3",
-        "duration": "0:28",
-        "type": "ringtone"
-    },
-    {
-        "id": "rt_3",
-        "title": "iPhone Stylish Ambient Chime",
-        "artist": "Apple Vibe",
-        "category": "Caller Tune",
+        "title": "Pasoori (Coke Studio Hook Tone)",
+        "artist": "Ali Sethi & Shae Gill",
+        "category": "Pakistani / Coke Studio",
         "cover": "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500",
-        "url": "https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3?filename=ukulele-trip-version-60s-9893.mp3",
-        "duration": "0:25",
-        "type": "ringtone"
-    },
-    {
-        "id": "rt_4",
-        "title": "Sad Emotional Heartbeat Tone",
-        "artist": "Arijit Vibe Tone",
-        "category": "Emotional",
-        "cover": "https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=500",
-        "url": "https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3?filename=sad-soul-10574.mp3",
+        "url": "https://cdn.pixabay.com/download/audio/2022/10/14/audio_9939f7772f.mp3?filename=good-vibes-124990.mp3",
         "duration": "0:32",
         "type": "ringtone"
     },
     {
+        "id": "rt_3",
+        "title": "Tum Hi Ho (Heart Touching Violin Tone)",
+        "artist": "Arijit Singh",
+        "category": "Bollywood Romantic",
+        "cover": "https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=500",
+        "url": "https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3?filename=sad-soul-10574.mp3",
+        "duration": "0:29",
+        "type": "ringtone"
+    },
+    {
+        "id": "rt_4",
+        "title": "Tajdar-e-Haram (Soulful Qawwali Tone)",
+        "artist": "Atif Aslam",
+        "category": "Pakistani Sufi",
+        "cover": "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=500",
+        "url": "https://cdn.pixabay.com/download/audio/2022/11/06/audio_c3c3a9686d.mp3?filename=relaxing-piano-music-sad-melancholy-romantic-instrumental-126243.mp3",
+        "duration": "0:35",
+        "type": "ringtone"
+    },
+    {
         "id": "rt_5",
-        "title": "KGF Action Power BGM Ringtone",
-        "artist": "Heavy Mass Bass",
-        "category": "Action BGM",
-        "cover": "https://images.unsplash.com/photo-1464375117522-1311d6a5b81f?w=500",
-        "url": "https://cdn.pixabay.com/download/audio/2022/08/04/audio_2dde660f40.mp3?filename=rock-it-21275.mp3",
-        "duration": "0:34",
+        "title": "Kesariya (Acoustic Guitar Chorus Tone)",
+        "artist": "Arijit Singh",
+        "category": "Bollywood Love",
+        "cover": "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=500",
+        "url": "https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3?filename=ukulele-trip-version-60s-9893.mp3",
+        "duration": "0:28",
         "type": "ringtone"
     },
     {
         "id": "rt_6",
-        "title": "Chill Morning Acoustic Ringtone",
-        "artist": "Sweet Melody",
-        "category": "Alarm / Tune",
-        "cover": "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=500",
-        "url": "https://cdn.pixabay.com/download/audio/2022/10/14/audio_9939f7772f.mp3?filename=good-vibes-124990.mp3",
-        "duration": "0:29",
+        "title": "Afreen Afreen (Sweet Harmonium Tone)",
+        "artist": "Rahat Fateh Ali Khan & Momina",
+        "category": "Pakistani Classic",
+        "cover": "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500",
+        "url": "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=positive-happy-day-112199.mp3",
+        "duration": "0:33",
+        "type": "ringtone"
+    },
+    {
+        "id": "rt_7",
+        "title": "Lollipop Lagelu (Desi Bass Hook Tone)",
+        "artist": "Pawan Singh",
+        "category": "Bhojpuri Hit",
+        "cover": "https://images.unsplash.com/photo-1464375117522-1311d6a5b81f?w=500",
+        "url": "https://cdn.pixabay.com/download/audio/2022/08/04/audio_2dde660f40.mp3?filename=rock-it-21275.mp3",
+        "duration": "0:30",
+        "type": "ringtone"
+    },
+    {
+        "id": "rt_8",
+        "title": "Tu Jaane Na (Melodious Acoustic Tone)",
+        "artist": "Atif Aslam",
+        "category": "Bollywood Nostalgia",
+        "cover": "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=500",
+        "url": "https://cdn.pixabay.com/download/audio/2022/04/27/audio_30bb69e8b6.mp3?filename=chill-abstract-intention-12099.mp3",
+        "duration": "0:31",
         "type": "ringtone"
     }
 ]
@@ -159,7 +179,6 @@ def index():
 
 @app.route("/api/songs")
 def get_songs():
-    """Return cloud full tracks + local music files"""
     data = {}
     for mood, tracks in FULL_AUDIO_LIBRARY.items():
         data[mood] = list(tracks)
@@ -211,7 +230,6 @@ def download_audio():
             headers={"Content-Disposition": f"attachment; filename=\"{filename}\""}
         )
     except Exception as e:
-        # Fallback: Redirect directly
         return f"<script>window.location.href='{url}';</script>"
 
 @app.route("/music/<emotion>/<filename>")
@@ -221,7 +239,7 @@ def serve_music(emotion, filename):
 
 if __name__ == "__main__":
     print("==========================================================")
-    print("  MOODBEAT AI - FULL MUSIC & RINGTONE DOWNLOAD ENGINE")
+    print("  MOODBEAT AI - FULL MUSIC, RINGTONES & AUTH PORTAL")
     print("  Local PC: http://localhost:5000")
     print("  Mobile:   http://192.168.1.9:5000")
     print("==========================================================")

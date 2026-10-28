@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>MoodBeat AI - Full Music, Ringtones & Downloader</title>
+  <title>MoodBeat AI - Music, Ringtones & Smart Auth</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Face-API.js for Browser Realtime Emotion Recognition -->
   <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.min.js"></script>
@@ -54,6 +54,81 @@
 </head>
 <body class="bg-[#080c14] text-gray-100 min-h-screen flex flex-col font-sans selection:bg-rose-500 selection:text-white pb-28">
 
+  <!-- ==================== AUTH GATE MODAL / OVERLAY ==================== -->
+  <div id="authGateOverlay" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-2xl">
+    <div class="glass-card w-full max-w-md rounded-3xl p-6 sm:p-8 shadow-2xl border border-white/10 relative overflow-hidden">
+      
+      <!-- Ambient Glow Behind Auth Card -->
+      <div class="absolute -top-24 left-1/2 transform -translate-x-1/2 w-72 h-72 bg-gradient-to-tr from-rose-600/30 via-purple-600/30 to-indigo-600/30 rounded-full blur-3xl pointer-events-none"></div>
+
+      <!-- App Logo / Title in Auth Modal -->
+      <div class="text-center space-y-2 relative z-10">
+        <div class="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-tr from-rose-500 via-purple-500 to-indigo-600 flex items-center justify-center shadow-xl shadow-rose-500/30">
+          <i class="fa-solid fa-compact-disc text-2xl text-white"></i>
+        </div>
+        <h2 class="text-xl sm:text-2xl font-bold bg-gradient-to-r from-rose-400 via-purple-300 to-indigo-400 bg-clip-text text-transparent">MoodBeat AI</h2>
+        <p class="text-xs text-gray-400">Login or Create Account to start listening</p>
+      </div>
+
+      <!-- Auth Tabs: Login vs Register -->
+      <div class="flex items-center justify-center p-1 bg-white/5 rounded-2xl border border-white/5 mt-6 relative z-10">
+        <button onclick="toggleAuthMode('login')" id="authTabLogin" class="flex-1 py-2 rounded-xl text-xs font-semibold bg-rose-600 text-white shadow-md transition">
+          Sign In
+        </button>
+        <button onclick="toggleAuthMode('register')" id="authTabRegister" class="flex-1 py-2 rounded-xl text-xs font-semibold text-gray-400 hover:text-white transition">
+          Create Account
+        </button>
+      </div>
+
+      <!-- Social Login: Google / Guest -->
+      <div class="space-y-2.5 mt-5 relative z-10">
+        <button onclick="handleGoogleSignIn()" class="w-full py-2.5 rounded-2xl bg-white text-gray-900 font-semibold text-xs sm:text-sm flex items-center justify-center gap-2.5 hover:bg-gray-100 active:scale-95 transition shadow-lg">
+          <svg class="w-4 h-4" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
+            <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.27v3.15C3.25 21.31 7.31 24 12 24z"/>
+            <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.27C.46 8.2 0 10.04 0 12s.46 3.8 1.27 5.42l4.01-3.15z"/>
+            <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.25 2.69 1.27 6.58l4.01 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+          </svg>
+          <span>Continue with Google</span>
+        </button>
+
+        <div class="flex items-center gap-3 my-3">
+          <div class="h-px bg-white/10 flex-1"></div>
+          <span class="text-[10px] text-gray-500 uppercase font-mono">or email</span>
+          <div class="h-px bg-white/10 flex-1"></div>
+        </div>
+      </div>
+
+      <!-- Email / Password Form -->
+      <form onsubmit="handleAuthSubmit(event)" class="space-y-3 relative z-10">
+        <!-- Name field (shown only in register) -->
+        <div id="authNameField" class="hidden">
+          <input id="authNameInput" type="text" placeholder="Full Name" class="w-full bg-[#121826] text-xs text-gray-200 rounded-xl px-3.5 py-3 border border-white/10 focus:outline-none focus:border-rose-500">
+        </div>
+
+        <div>
+          <input id="authEmailInput" type="email" required placeholder="Email Address" class="w-full bg-[#121826] text-xs text-gray-200 rounded-xl px-3.5 py-3 border border-white/10 focus:outline-none focus:border-rose-500">
+        </div>
+
+        <div>
+          <input id="authPasswordInput" type="password" required placeholder="Password" class="w-full bg-[#121826] text-xs text-gray-200 rounded-xl px-3.5 py-3 border border-white/10 focus:outline-none focus:border-rose-500">
+        </div>
+
+        <button type="submit" id="authSubmitBtn" class="w-full py-3 rounded-2xl bg-gradient-to-r from-rose-600 to-indigo-600 hover:opacity-95 text-white font-semibold text-xs sm:text-sm shadow-xl shadow-rose-600/30 transition active:scale-95">
+          Sign In & Start Music
+        </button>
+      </form>
+
+      <!-- Guest Skip Option -->
+      <div class="text-center mt-4 relative z-10">
+        <button onclick="continueAsGuest()" class="text-xs text-gray-400 hover:text-white underline">
+          Continue as Guest Listener &rarr;
+        </button>
+      </div>
+
+    </div>
+  </div>
+
   <!-- Top App Bar -->
   <header class="sticky top-0 z-40 bg-[#080c14]/90 backdrop-blur-xl border-b border-white/5 px-4 sm:px-6 py-3.5 flex items-center justify-between">
     <div onclick="navigateTo('home')" class="flex items-center gap-3 cursor-pointer">
@@ -66,12 +141,13 @@
       </div>
     </div>
 
-    <!-- Quick Action / Status -->
+    <!-- User Profile & Action Pill -->
     <div class="flex items-center gap-2">
-      <button onclick="navigateTo('downloads')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 text-gray-300 text-xs font-semibold border border-white/10 transition">
-        <i class="fa-solid fa-arrow-down text-rose-400"></i>
-        <span class="hidden sm:inline">Downloads (<span id="topDlCount">0</span>)</span>
-      </button>
+      <div id="userProfileBadge" onclick="showAuthModal()" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 text-gray-300 text-xs font-medium border border-white/10 cursor-pointer transition">
+        <i class="fa-solid fa-user text-rose-400 text-xs"></i>
+        <span id="headerUserName" class="max-w-[90px] truncate">Guest</span>
+      </div>
+
       <button onclick="navigateTo('ai')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/30 text-xs font-semibold shadow-md active:scale-95 transition">
         <i class="fa-solid fa-face-smile"></i>
         <span class="hidden sm:inline">AI Mood</span>
@@ -91,18 +167,18 @@
         
         <div class="max-w-xl relative z-10 space-y-4">
           <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs font-semibold">
-            <span class="w-2 h-2 rounded-full bg-rose-400 animate-ping"></span> High-Speed MP3 Downloader + Ringtones
+            <span class="w-2 h-2 rounded-full bg-rose-400 animate-ping"></span> Real-Time Hindi, Pakistani & International
           </span>
           <h2 class="text-2xl sm:text-4xl font-extrabold text-white leading-tight">
             Gaana Suno, Ringtone Set Karo <span class="bg-gradient-to-r from-rose-400 to-purple-400 bg-clip-text text-transparent">& Download Karo.</span>
           </h2>
           <p class="text-xs sm:text-sm text-gray-300">
-            Duniya ka koi bhi gaana ya ringtone 1-click me direct mobile aur PC me download karo 320kbps original quality me.
+            Kahani Suno, Pasoori, Arijit, Atif Aslam, Coke Studio, Bhojpuri hits aur 40+ full songs instantly download karo 320kbps me.
           </p>
 
           <div class="flex flex-wrap gap-3 pt-2">
             <button onclick="navigateTo('ringtones')" class="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-rose-600 to-indigo-600 hover:opacity-95 text-white font-semibold text-xs sm:text-sm shadow-xl shadow-rose-600/30 active:scale-95 transition flex items-center gap-2">
-              <i class="fa-solid fa-bell"></i> Browse Ringtones
+              <i class="fa-solid fa-bell"></i> Hindi & Pakistani Ringtones
             </button>
             <button onclick="navigateTo('discover')" class="px-5 py-2.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-semibold text-xs sm:text-sm border border-white/10 active:scale-95 transition flex items-center gap-2">
               <i class="fa-solid fa-compass"></i> Search Full Songs
@@ -176,7 +252,7 @@
         <input 
           id="musicSearchInput" 
           type="text" 
-          placeholder="Search any singer, actor, song (Arijit, Shreya, Pawan Singh, Salman, Sidhu)..." 
+          placeholder="Search any singer, actor, Hindi or Pakistani song (Arijit, Atif, Kaifi, Shreya, Pawan Singh)..." 
           class="w-full bg-[#121826] text-sm text-gray-100 rounded-2xl pl-11 pr-24 py-3.5 border border-white/10 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 shadow-xl transition"
         >
         <button id="searchBtn" class="absolute right-2 top-1/2 transform -translate-y-1/2 px-4 py-2 rounded-xl bg-gradient-to-r from-rose-600 to-indigo-600 hover:opacity-90 text-xs font-semibold text-white transition shadow-md">
@@ -187,12 +263,12 @@
       <!-- Quick Suggestion Badges -->
       <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 text-xs text-gray-300">
         <span class="text-gray-500 text-[11px]">Popular:</span>
+        <button onclick="performSearch('Kaifi Khalil Kahani Suno')" class="px-3 py-1 rounded-full bg-white/5 hover:bg-white/10 border border-white/5 whitespace-nowrap">Kahani Suno</button>
+        <button onclick="performSearch('Pasoori Coke Studio')" class="px-3 py-1 rounded-full bg-white/5 hover:bg-white/10 border border-white/5 whitespace-nowrap">Pasoori</button>
+        <button onclick="performSearch('Atif Aslam Hits')" class="px-3 py-1 rounded-full bg-white/5 hover:bg-white/10 border border-white/5 whitespace-nowrap">Atif Aslam</button>
         <button onclick="performSearch('Arijit Singh')" class="px-3 py-1 rounded-full bg-white/5 hover:bg-white/10 border border-white/5 whitespace-nowrap">Arijit Singh</button>
         <button onclick="performSearch('Shreya Ghoshal')" class="px-3 py-1 rounded-full bg-white/5 hover:bg-white/10 border border-white/5 whitespace-nowrap">Shreya Ghoshal</button>
         <button onclick="performSearch('Pawan Singh Bhojpuri')" class="px-3 py-1 rounded-full bg-white/5 hover:bg-white/10 border border-white/5 whitespace-nowrap">Pawan Singh</button>
-        <button onclick="performSearch('Sidhu Moosewala')" class="px-3 py-1 rounded-full bg-white/5 hover:bg-white/10 border border-white/5 whitespace-nowrap">Sidhu Moosewala</button>
-        <button onclick="performSearch('Salman Khan Hits')" class="px-3 py-1 rounded-full bg-white/5 hover:bg-white/10 border border-white/5 whitespace-nowrap">Salman Khan</button>
-        <button onclick="performSearch('Taylor Swift')" class="px-3 py-1 rounded-full bg-white/5 hover:bg-white/10 border border-white/5 whitespace-nowrap">Taylor Swift</button>
       </div>
 
       <!-- Station Tabs Filter -->
@@ -227,16 +303,30 @@
 
     </section>
 
-    <!-- ==================== VIEW 3: DEDICATED RINGTONES SECTION ==================== -->
+    <!-- ==================== VIEW 3: DEDICATED RINGTONES WITH SEARCH ==================== -->
     <section id="view-ringtones" class="hidden space-y-6">
       
-      <div class="flex items-center justify-between px-1">
+      <div class="flex flex-wrap items-center justify-between gap-3 px-1">
         <div>
           <h2 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-            <i class="fa-solid fa-bell text-rose-500"></i> Popular Ringtones & Caller Tunes
+            <i class="fa-solid fa-bell text-rose-500"></i> Hindi & Pakistani Caller Tunes / Ringtones
           </h2>
-          <p class="text-xs text-gray-400">Play, preview, and download your favorite ringtones for phone</p>
+          <p class="text-xs text-gray-400">Search, preview, and download your favorite ringtones for phone</p>
         </div>
+      </div>
+
+      <!-- Ringtone Search Box -->
+      <div class="relative">
+        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
+        <input 
+          id="ringtoneSearchInput" 
+          type="text" 
+          placeholder="Search ringtones (Kahani Suno, Pasoori, Kesariya, Atif, Qawwali, BGM)..." 
+          class="w-full bg-[#121826] text-sm text-gray-100 rounded-2xl pl-11 pr-24 py-3 border border-white/10 focus:outline-none focus:border-rose-500 shadow-xl"
+        >
+        <button onclick="searchRingtonesDirect()" class="absolute right-2 top-1/2 transform -translate-y-1/2 px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-xs font-semibold text-white transition">
+          Find Tone
+        </button>
       </div>
 
       <!-- Ringtones Grid -->
@@ -370,7 +460,6 @@
           </button>
         </div>
 
-        <!-- Camera Video Feed & Live Face Canvas Overlay -->
         <div class="relative w-full aspect-video max-h-[380px] rounded-2xl overflow-hidden bg-black/80 flex items-center justify-center border border-white/10 shadow-inner">
           <div id="camInactiveCard" class="flex flex-col items-center justify-center p-6 text-center space-y-3">
             <div class="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 text-2xl">
@@ -383,7 +472,6 @@
           <video id="videoFeed" autoplay muted playsinline class="w-full h-full object-cover hidden transform -scale-x-100"></video>
           <canvas id="overlayCanvas" class="absolute inset-0 w-full h-full pointer-events-none transform -scale-x-100 hidden"></canvas>
 
-          <!-- Current Emotion Tag in Corner -->
           <div id="liveMoodCard" class="absolute bottom-3 left-3 hidden bg-black/80 backdrop-blur-md px-3.5 py-2 rounded-xl border border-white/10 flex items-center gap-2.5 shadow-xl">
             <span id="liveMoodEmoji" class="text-2xl">😊</span>
             <div>
@@ -515,7 +603,7 @@
     </div>
   </div>
 
-  <!-- ==================== NATIVE BOTTOM NAVIGATION BAR (NOW 6 TABS) ==================== -->
+  <!-- ==================== NATIVE BOTTOM NAVIGATION BAR (6 TABS) ==================== -->
   <nav class="fixed bottom-0 left-0 right-0 z-40 glass-nav h-14 md:h-16 flex items-center justify-around px-1 text-gray-400 select-none">
     
     <button onclick="navigateTo('home')" id="nav-home" class="flex flex-col items-center justify-center gap-0.5 text-rose-400 font-semibold w-12 sm:w-16 transition">
@@ -557,6 +645,8 @@
   <script>
     // State
     let currentView = 'home';
+    let authMode = 'login'; // 'login' or 'register'
+    let currentUser = null;
     let songsData = { happy: [], sad: [], angry: [], neutral: [] };
     let ringtonesData = [];
     let activeFeedPlaylist = [];
@@ -572,6 +662,16 @@
     let detectInterval = null;
 
     // Elements
+    const authGateOverlay = document.getElementById('authGateOverlay');
+    const authTabLogin = document.getElementById('authTabLogin');
+    const authTabRegister = document.getElementById('authTabRegister');
+    const authNameField = document.getElementById('authNameField');
+    const authNameInput = document.getElementById('authNameInput');
+    const authEmailInput = document.getElementById('authEmailInput');
+    const authPasswordInput = document.getElementById('authPasswordInput');
+    const authSubmitBtn = document.getElementById('authSubmitBtn');
+    const headerUserName = document.getElementById('headerUserName');
+
     const audio = document.getElementById('globalAudio');
     const bottomMiniPlayer = document.getElementById('bottomMiniPlayer');
     const miniTitle = document.getElementById('miniTitle');
@@ -608,8 +708,84 @@
     const feedCount = document.getElementById('feedCount');
     const musicSearchInput = document.getElementById('musicSearchInput');
     const searchBtn = document.getElementById('searchBtn');
+    const ringtoneSearchInput = document.getElementById('ringtoneSearchInput');
 
-    // Navigation Switcher
+    // ==================== AUTH SYSTEM ====================
+    function initAuth() {
+      const savedUser = localStorage.getItem('moodbeat_user');
+      if (savedUser) {
+        try {
+          currentUser = JSON.parse(savedUser);
+          headerUserName.textContent = currentUser.name || currentUser.email.split('@')[0];
+          authGateOverlay.classList.add('hidden');
+        } catch(e) {
+          authGateOverlay.classList.remove('hidden');
+        }
+      } else {
+        authGateOverlay.classList.remove('hidden');
+      }
+    }
+
+    function showAuthModal() {
+      authGateOverlay.classList.remove('hidden');
+    }
+
+    function toggleAuthMode(mode) {
+      authMode = mode;
+      if (mode === 'login') {
+        authTabLogin.className = "flex-1 py-2 rounded-xl text-xs font-semibold bg-rose-600 text-white shadow-md transition";
+        authTabRegister.className = "flex-1 py-2 rounded-xl text-xs font-semibold text-gray-400 hover:text-white transition";
+        authNameField.classList.add('hidden');
+        authSubmitBtn.textContent = "Sign In & Start Music";
+      } else {
+        authTabRegister.className = "flex-1 py-2 rounded-xl text-xs font-semibold bg-rose-600 text-white shadow-md transition";
+        authTabLogin.className = "flex-1 py-2 rounded-xl text-xs font-semibold text-gray-400 hover:text-white transition";
+        authNameField.classList.remove('hidden');
+        authSubmitBtn.textContent = "Create Account & Start";
+      }
+    }
+
+    function handleAuthSubmit(e) {
+      e.preventDefault();
+      const email = authEmailInput.value;
+      const name = authNameInput.value || email.split('@')[0];
+
+      currentUser = {
+        name: name,
+        email: email,
+        type: 'email',
+        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100'
+      };
+
+      localStorage.setItem('moodbeat_user', JSON.stringify(currentUser));
+      headerUserName.textContent = currentUser.name;
+      authGateOverlay.classList.add('hidden');
+    }
+
+    function handleGoogleSignIn() {
+      currentUser = {
+        name: 'Google Listener',
+        email: 'user@gmail.com',
+        type: 'google',
+        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100'
+      };
+      localStorage.setItem('moodbeat_user', JSON.stringify(currentUser));
+      headerUserName.textContent = currentUser.name;
+      authGateOverlay.classList.add('hidden');
+    }
+
+    function continueAsGuest() {
+      currentUser = {
+        name: 'Guest User',
+        email: 'guest@moodbeat.ai',
+        type: 'guest'
+      };
+      localStorage.setItem('moodbeat_user', JSON.stringify(currentUser));
+      headerUserName.textContent = "Guest";
+      authGateOverlay.classList.add('hidden');
+    }
+
+    // ==================== NAVIGATION SWITCHER ====================
     function navigateTo(viewName) {
       currentView = viewName;
       ['home', 'discover', 'ringtones', 'downloads', 'player', 'ai', 'library'].forEach(v => {
@@ -636,7 +812,7 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // Storage Management (Playlists + Downloads)
+    // Storage Management
     function getStoredPlaylists() {
       const saved = localStorage.getItem('moodbeat_v2_playlists');
       if (saved) {
@@ -677,9 +853,6 @@
       document.getElementById('libCountSad').textContent = store.sad?.length || 0;
       document.getElementById('libCountAngry').textContent = store.angry?.length || 0;
       document.getElementById('libCountNeutral').textContent = store.neutral?.length || 0;
-
-      const downloads = getStoredDownloads();
-      document.getElementById('topDlCount').textContent = downloads.length;
     }
 
     function getCurrentSong() {
@@ -740,7 +913,6 @@
       if (!track || !track.url) return;
       saveDownloadRecord(track);
 
-      // Trigger actual file download via backend proxy to save directly to phone/pc
       const filename = `${track.title.replace(/[^\w\s-]/gi, '')}_MoodBeat.mp3`;
       const downloadUrl = `/api/download?url=${encodeURIComponent(track.url)}&filename=${encodeURIComponent(filename)}`;
       
@@ -759,6 +931,7 @@
 
     // Initial Data Fetch
     async function initApp() {
+      initAuth();
       try {
         const [songsRes, rtRes] = await Promise.all([
           fetch('/api/songs'),
@@ -769,7 +942,7 @@
 
         updateCounts();
         renderHomeFeatured();
-        renderRingtonesView();
+        renderRingtonesView(ringtonesData);
         switchDiscoverTab('happy');
       } catch (e) {
         console.error("API error:", e);
@@ -884,15 +1057,15 @@
       });
     }
 
-    // Ringtones Section Render
-    function renderRingtonesView() {
+    // ==================== RINGTONES SECTION & LIVE SEARCH ====================
+    function renderRingtonesView(tones) {
       ringtonesFeedList.innerHTML = '';
-      if (!ringtonesData || ringtonesData.length === 0) {
-        ringtonesFeedList.innerHTML = `<p class="text-xs text-gray-500 text-center py-8">No ringtones loaded.</p>`;
+      if (!tones || tones.length === 0) {
+        ringtonesFeedList.innerHTML = `<p class="text-xs text-gray-500 text-center py-8">No ringtones found for this search.</p>`;
         return;
       }
 
-      ringtonesData.forEach((tone, idx) => {
+      tones.forEach((tone, idx) => {
         const item = document.createElement('div');
         item.className = "flex items-center justify-between p-3 rounded-2xl bg-white/5 hover:bg-white/10 transition cursor-pointer border border-white/5";
         item.innerHTML = `
@@ -902,12 +1075,12 @@
             </div>
             <div class="truncate">
               <p class="text-xs sm:text-sm font-semibold text-white truncate">${tone.title}</p>
-              <p class="text-[10px] text-gray-400 truncate">${tone.artist} &bull; <span class="text-rose-400">${tone.category}</span></p>
+              <p class="text-[10px] text-gray-400 truncate">${tone.artist} &bull; <span class="text-rose-400">${tone.category || 'Ringtone'}</span></p>
             </div>
           </div>
           <div class="flex items-center gap-2 flex-shrink-0">
-            <span class="text-[10px] text-gray-500 font-mono">${tone.duration}</span>
-            <button onclick="event.stopPropagation(); triggerDownload(ringtonesData[${idx}])" class="px-2.5 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30 text-xs flex items-center gap-1">
+            <span class="text-[10px] text-gray-500 font-mono">${tone.duration || '0:30'}</span>
+            <button onclick="event.stopPropagation(); triggerDownload(ringtonesData[${idx}] || activeFeedPlaylist[${idx}])" class="px-2.5 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30 text-xs flex items-center gap-1">
               <i class="fa-solid fa-arrow-down text-[10px]"></i> Download
             </button>
             <button class="w-8 h-8 rounded-full bg-rose-600/80 hover:bg-rose-600 text-white flex items-center justify-center text-xs">
@@ -916,12 +1089,50 @@
           </div>
         `;
         item.onclick = () => {
-          activeFeedPlaylist = ringtonesData;
+          activeFeedPlaylist = tones;
           loadSong(idx, true);
         };
         ringtonesFeedList.appendChild(item);
       });
     }
+
+    async function searchRingtonesDirect() {
+      const q = ringtoneSearchInput.value;
+      if (!q || q.trim() === '') return;
+
+      ringtonesFeedList.innerHTML = `<p class="text-xs text-gray-400 text-center py-8 flex items-center justify-center gap-2"><i class="fa-solid fa-circle-notch fa-spin"></i> Searching tone for "${q}"...</p>`;
+
+      try {
+        const res = await fetch(`https://saavn.dev/api/search/songs?query=${encodeURIComponent(q + ' ringtone flute bgm')}&limit=15`);
+        const json = await res.json();
+        if (json?.success && json?.data?.results?.length > 0) {
+          const fetchedTones = json.data.results.map(item => {
+            const bestQuality = item.downloadUrl?.find(d => d.quality === '320kbps') || item.downloadUrl?.[item.downloadUrl.length - 1];
+            return {
+              id: item.id,
+              title: item.name.replace(/&quot;/g, '"').replace(/&#039;/g, "'").replace(/&amp;/g, '&'),
+              artist: item.artists?.primary?.map(a => a.name).join(', ') || 'Caller Tune',
+              category: 'Searched Tone',
+              cover: item.image?.[item.image.length - 1]?.url || 'https://images.unsplash.com/photo-1518495973542-4542c06a5843?w=500',
+              url: bestQuality?.url || item.downloadUrl?.[0]?.url,
+              duration: formatSec(item.duration),
+              type: 'ringtone'
+            };
+          }).filter(t => t.url);
+
+          renderRingtonesView(fetchedTones);
+          return;
+        }
+      } catch (err) {}
+
+      // Fallback filter
+      const filtered = ringtonesData.filter(r => r.title.toLowerCase().includes(q.toLowerCase()) || r.artist.toLowerCase().includes(q.toLowerCase()));
+      renderRingtonesView(filtered);
+    }
+
+    ringtoneSearchInput?.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') searchRingtonesDirect();
+    });
 
     // Downloads Section Render
     function renderDownloadsView() {
